@@ -1,0 +1,90 @@
+# This workflow builds and pushes a Docker container to Google Artifact
+# Registry and deploys it to Cloud Run when a commit is pushed to "main".
+#
+# Copied from the Amber prototype's proven pipeline. To use this in a NEW
+# prototype repo created from this template:
+#
+# 1. Update the four values in the "env" block below (PROJECT_ID, REGION,
+#    SERVICE, WORKLOAD_IDENTITY_PROVIDER) to match your new service name.
+# 2. Confirm SYNANETICS_GCP_WORKLOAD_IDENTITY_PROVIDER and
+#    SYNANETICS_GCP_SERVICE_ACCOUNT exist as secrets this repo can see
+#    (check whether they're set at the SynaneticsLtd org level first --
+#    if so, nothing to do here; if not, ask whoever administers the
+#    tooling-synanetics GCP project to add them to this repo).
+# 3. The FIRST deploy of a brand-new Cloud Run service comes up locked to
+#    authenticated Google accounts only. If this prototype needs to be
+#    shareable externally by link, add `flags: --allow-unauthenticated`
+#    to the deploy step below, or ask whoever owns the GCP project to grant
+#    allUsers the Cloud Run Invoker role on the new service once.
+
+name: 'Build and Deploy to Cloud Run'
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: 'tooling-synanetics' # TODO: confirm this is still your GCP project
+  REGION: 'europe-west2' # TODO: update to your region
+  SERVICE: 'CHANGE-ME-prototype' # TODO: update to your service name
+  WORKLOAD_IDENTITY_PROVIDER: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider' # TODO: update if different
+
+jobs:
+  deploy:
+    runs-on: 'ubuntu-latest'
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: 'Checkout'
+        uses: 'actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332' # actions/checkout@v6
+
+      - name: Set outputs
+        id: vars
+        run: |
+          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "sha_long=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      # Configure Workload Identity Federation and generate an access token.
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: '${{ secrets.SYNANETICS_GCP_WORKLOAD_IDENTITY_PROVIDER }}'
+          service_account: '${{ secrets.SYNANETICS_GCP_SERVICE_ACCOUNT }}'
+
+      - name: Configure Docker to use gcloud as a credential helper
+        run: gcloud auth configure-docker eu.gcr.io,europe-west2-docker.pkg.dev
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build container image
+        run: docker build -t prototype-app .
+
+      - name: Tag docker image
+        run: |
+          docker tag prototype-app europe-west2-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}-repo/prototype-app:${{ github.ref_name }}-${{ steps.vars.outputs.sha_short }}
+          docker tag prototype-app europe-west2-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}-repo/prototype-app:latest
+
+      - name: Push container image
+        run: |
+          docker push europe-west2-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}-repo/prototype-app:${{ github.ref_name }}-${{ steps.vars.outputs.sha_short }}
+          docker push europe-west2-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}-repo/prototype-app:latest
+
+      - name: deploy
+        id: deploy
+        uses: 'google-github-actions/deploy-cloudrun@33553064113a37d688aa6937bacbdc481580be17' # google-github-actions/deploy-cloudrun@v2
+        with:
+          service: '${{ env.SERVICE }}'
+          region: '${{ env.REGION }}'
+          project_id: '${{ env.PROJECT_ID }}'
+          image: 'europe-west2-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}-repo/prototype-app:latest'
+
+      - name: 'Show output'
+        run: |2-
+
+          echo ${{ steps.deploy.outputs.url }}
