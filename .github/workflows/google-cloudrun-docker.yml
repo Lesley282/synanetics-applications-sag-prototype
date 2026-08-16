@@ -83,6 +83,7 @@ jobs:
           region: '${{ env.REGION }}'
           project_id: '${{ env.PROJECT_ID }}'
           image: 'europe-west2-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}-repo/prototype-app:latest'
+          flags: '--allow-unauthenticated'
 
       - name: 'Show output'
         run: |2-
