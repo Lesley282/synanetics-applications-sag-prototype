@@ -7,98 +7,113 @@
 
 .SignIn__brandPanel {
   display: flex;
-  position: relative;
   flex: 1;
   flex-direction: column;
   justify-content: space-between;
+  align-items: flex-start;
+  gap: 48px;
   background: var(--color-fill-surface-navigation);
-  padding: var(--spacing-600);
+  padding: 48px;
+  min-width: 0;
   overflow: hidden;
   color: var(--color-text-standard-primary-light);
 }
 
-.SignIn__particle {
-  position: absolute;
-  border-radius: var(--border-radius-full);
-  background: var(--color-white-100, #fff);
-  pointer-events: none;
-}
-
-.SignIn__brandHeader {
-  position: relative;
-  z-index: 1;
-
-  svg {
-    width: auto;
-    height: 32px;
-  }
+.SignIn__brandHeader svg {
+  width: auto;
+  height: 32px;
 }
 
 .SignIn__brandCopy {
-  position: relative;
-  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
   max-width: 460px;
 
   h1 {
-    margin: 0 0 var(--spacing-400);
+    margin: 0;
     font-weight: var(--font-weight-bold);
-    font-size: clamp(1.75rem, 5vw, var(--font-size-900));
+    font-size: clamp(1.75rem, 4vw, 40px);
     line-height: 1.15;
     font-family: var(--font-family-header);
+    text-wrap: pretty;
   }
 
   p {
     opacity: 0.9;
     margin: 0;
-    font-size: var(--font-size-300);
+    font-size: 16px;
     line-height: 1.5;
+    text-wrap: pretty;
   }
 }
 
 .SignIn__brandFooter {
-  position: relative;
-  opacity: 0.7;
-  z-index: 1;
-  font-size: var(--font-size-100);
+  opacity: 0.75;
+  font-size: 12px;
 }
 
 .SignIn__formPanel {
   display: flex;
+  position: relative;
+  flex: 0 0 auto;
   justify-content: center;
   align-items: center;
+  border-left: 1px solid var(--color-grey-100);
   background: var(--color-fill-surface-default);
-  width: 460px;
+  padding: 48px 56px;
+  width: 480px;
+  overflow: hidden;
+}
+
+.SignIn__canvas {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 .SignIn__formCard {
-  padding: 0 var(--spacing-600);
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 24px;
+  transition: opacity 1400ms ease;
   width: 100%;
+  max-width: 368px;
 
   h2 {
-    margin: 0 0 var(--spacing-150);
+    margin: 0 0 6px;
     color: var(--color-text-standard-primary);
     font-weight: var(--font-weight-medium);
-    font-size: var(--font-size-700);
+    font-size: 28px;
+    line-height: 1.2;
     font-family: var(--font-family-header);
   }
 }
 
 .SignIn__formSubtitle {
-  margin: 0 0 var(--spacing-700);
+  margin: 0;
   color: var(--color-text-standard-secondary);
-  font-size: var(--font-size-300);
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .SignIn__fields {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-400);
+  gap: 16px;
 }
 
 .SignIn__rememberRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
 }
 
 .SignIn__linkButton {
@@ -107,7 +122,7 @@
   background: none;
   padding: 0;
   color: var(--color-text-link);
-  font-size: var(--font-size-200);
+  font-size: 13px;
   font-family: var(--font-family-body);
 }
 
@@ -116,8 +131,10 @@
 }
 
 .SignIn__disclaimer {
-  margin: var(--spacing-700) 0 0;
+  margin: 0;
+  border-top: 1px solid var(--color-grey-100);
+  padding-top: 8px;
   color: var(--color-text-standard-secondary);
-  font-size: var(--font-size-100);
+  font-size: 12px;
   line-height: 1.5;
 }
