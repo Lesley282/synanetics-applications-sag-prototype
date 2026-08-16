@@ -59,6 +59,15 @@ jobs:
       - name: Configure Docker to use gcloud as a credential helper
         run: gcloud auth configure-docker eu.gcr.io,europe-west2-docker.pkg.dev
 
+      - name: Ensure Artifact Registry repository exists
+        run: |
+          gcloud artifacts repositories describe "${{ env.SERVICE }}-repo" \
+            --project="${{ env.PROJECT_ID }}" --location="${{ env.REGION }}" >/dev/null 2>&1 || \
+          gcloud artifacts repositories create "${{ env.SERVICE }}-repo" \
+            --project="${{ env.PROJECT_ID }}" --location="${{ env.REGION }}" \
+            --repository-format=docker \
+            --description="Docker repository for ${{ env.SERVICE }}"
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
